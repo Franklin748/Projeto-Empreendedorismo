@@ -7,7 +7,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-// Cores
+// Cores do projeto
 const COLOR_PRIMARY = '#2381FD';
 const COLOR_BG_LIGHT = '#D8E0E5';
 const COLOR_TOTAL = '#95BDFB';
@@ -24,9 +24,9 @@ const MOCK_ORDERS = [
     id: 'OS-0128',
     dataAbertura: '2024-05-24T08:30:00',
     dataFormatada: '24/05/2024 08:30',
-    equipamento: 'Escavadeiro CAT 320',
+    equipamento: 'Escavadeira CAT 320',
     solicitante: 'Marcos Lima',
-    responsavel: 'Jogão silva',
+    responsavel: 'João Silva',
     status: 'Em Execução',
     prioridade: 'Alta',
     horimetro: '4256 h',
@@ -62,15 +62,15 @@ const MOCK_ORDERS = [
     dataFormatada: '23/05/2024 14:15',
     equipamento: 'Caminhão Scania G450',
     solicitante: 'Roberto Mendes',
-    responsavel: 'Jogão silva',
+    responsavel: 'João Silva',
     status: 'Concluído',
     prioridade: 'Baixa',
     horimetro: '8900 h',
     local: 'Oficina Central',
     tipoServico: 'Inspeção',
-    descricao: 'Inspeção periódica de pneuma e freios',
+    descricao: 'Inspeção periódica de pneus e freios',
     historico: [
-      { data: '23/05/2024 16:00', evento: 'Serviço Concluído', responsavel: 'Jogão silva' },
+      { data: '23/05/2024 16:00', evento: 'Serviço Concluído', responsavel: 'João Silva' },
       { data: '23/05/2024 14:15', evento: 'OS aberta', responsavel: 'Roberto Mendes' },
     ]
   }
@@ -81,7 +81,7 @@ const DEFAULT_COLUMNS = [
   { key: 'data', label: 'Data da abertura' },
   { key: 'equipamento', label: 'Equipamento' },
   { key: 'solicitante', label: 'Solicitante' },
-  { key: 'responsavel', label: 'Responsavel' },
+  { key: 'responsavel', label: 'Responsável' },
   { key: 'status', label: 'Status' },
   { key: 'prioridade', label: 'Prioridade' }
 ];
@@ -89,7 +89,7 @@ const DEFAULT_COLUMNS = [
 const OrdemServico = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOS, setSelectedOS] = useState(MOCK_ORDERS[0]);
-  const [sortField, setSortField] = useState('id'); // 'id', 'data', 'status', 'prioridade', 'equipamento', 'solicitante', 'responsavel'
+  const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef(null);
@@ -113,7 +113,6 @@ const OrdemServico = () => {
     };
   }, []);
 
-  // Reordena as colunas para trazer a selecionada para a frente
   const columns = useMemo(() => {
     if (['data', 'status', 'prioridade', 'equipamento', 'solicitante', 'responsavel'].includes(sortField)) {
       const targetCol = DEFAULT_COLUMNS.find(c => c.key === sortField);
@@ -198,15 +197,16 @@ const OrdemServico = () => {
       fontSize: '12px',
       fontWeight: '600',
       display: 'inline-block',
-      textAlign: 'center'
+      textAlign: 'center',
+      whiteSpace: 'nowrap'
     };
   };
 
   return (
-    <div style={{ flex: 1, backgroundColor: COLOR_BG_LIGHT, borderRadius: '24px', padding: '24px', boxSizing: 'border-box', overflowY: 'auto', fontFamily: 'sans-serif' }}>
+    <div style={{ flex: 1, backgroundColor: COLOR_BG_LIGHT, borderRadius: '24px', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', fontFamily: 'sans-serif', width: '100%' }}>
       
       {/* Cabeçalho */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#000', margin: '0 0 4px 0' }}>Ordem de Serviço</h1>
           <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Acompanhamento de todas as Ordens de Serviço</p>
@@ -225,76 +225,88 @@ const OrdemServico = () => {
             display: 'flex', 
             alignItems: 'center', 
             gap: '8px', 
-            cursor: 'pointer'
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(35, 129, 253, 0.3)'
           }}
         >
           <Plus size={18} /> Nova OS
         </button>
       </div>
 
-      {/* Métricas */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_TOTAL }} />
+      {/* Métricas em Grade 2x2 */}
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(2, 1fr)', 
+          gap: '12px', 
+          marginBottom: '24px' 
+        }}
+      >
+        {/* Total OS */}
+        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_TOTAL, flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: '13px', color: '#666' }}>Total OS</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>Total OS</div>
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#000' }}>{metrics.total}</div>
             <div style={{ fontSize: '11px', color: '#999' }}>Todas as ordens</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_ABERTO }} />
+        {/* Aberto */}
+        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_ABERTO, flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: '13px', color: '#666' }}>Aberto</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>Aberto</div>
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#000' }}>{metrics.aberto}</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>Em andamento</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>Aguardando início</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_EXECUCAO }} />
+        {/* Em Execução */}
+        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_EXECUCAO, flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: '13px', color: '#666' }}>Em Execução</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>Em Execução</div>
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#000' }}>{metrics.execucao}</div>
             <div style={{ fontSize: '11px', color: '#999' }}>Em andamento</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_CONCLUIDO }} />
+        {/* Concluídas */}
+        <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_CONCLUIDO, flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: '13px', color: '#666' }}>Concluidas</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>Concluídas</div>
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#000' }}>{metrics.concluidas}</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>Finalizados</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>Finalizadas</div>
           </div>
         </div>
       </div>
 
-      {/* Tabela com Filtro */}
-      <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '20px', marginBottom: '24px' }}>
+      {/* Tabela com Filtro e Busca */}
+      <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: `2px solid ${COLOR_PRIMARY}`, display: 'inline-block', paddingBottom: '4px' }}>
           Ordem de Serviço
         </h2>
 
         {/* Busca e Botão Filtrar */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', backgroundColor: '#EFEFEF', borderRadius: '8px', padding: '0 12px' }}>
-            <Search size={16} color="#888" style={{ marginRight: '8px' }} />
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <div style={{ flex: '1 1 240px', display: 'flex', alignItems: 'center', backgroundColor: '#EFEFEF', borderRadius: '8px', padding: '0 12px' }}>
+            <Search size={16} color="#888" style={{ marginRight: '8px', flexShrink: 0 }} />
             <input 
               type="text" 
-              placeholder="Buscar por número, equipamento ou solicitante..."
+              placeholder="Buscar por número, equipamento..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ border: 'none', backgroundColor: 'transparent', outline: 'none', width: '100%', fontSize: '13px', padding: '10px 0' }}
             />
           </div>
 
-          {/* Menu Dropdown de Filtros Expandido */}
+          {/* Menu Dropdown de Filtros */}
           <div style={{ position: 'relative' }} ref={filterRef}>
             <button 
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              style={{ backgroundColor: '#E0E0E0', border: 'none', borderRadius: '8px', padding: '0 16px', height: '100%', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+              style={{ backgroundColor: '#E0E0E0', border: 'none', borderRadius: '8px', padding: '10px 16px', height: '100%', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               <Filter size={14} /> Filtrar <ChevronDown size={14} />
             </button>
@@ -330,9 +342,9 @@ const OrdemServico = () => {
           </div>
         </div>
 
-        {/* Tabela Reordenável */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+        {/* Container para rolagem horizontal em telas pequenas */}
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', minWidth: '650px' }}>
             <thead>
               <tr style={{ backgroundColor: '#E2E8F0', color: '#333' }}>
                 {columns.map((col, index) => (
@@ -341,7 +353,8 @@ const OrdemServico = () => {
                     style={{ 
                       padding: '10px', 
                       borderRadius: index === 0 ? '6px 0 0 6px' : index === columns.length - 1 ? '0 6px 6px 0' : '0',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {col.label}
@@ -375,7 +388,7 @@ const OrdemServico = () => {
                     }}
                   >
                     {columns.map((col) => (
-                      <td key={col.key} style={{ padding: '12px 10px' }}>
+                      <td key={col.key} style={{ padding: '12px 10px', whiteSpace: 'nowrap' }}>
                         {renderCellContent(col.key)}
                       </td>
                     ))}
@@ -389,59 +402,63 @@ const OrdemServico = () => {
 
       {/* Histórico e Detalhes da OS */}
       {selectedOS && (
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           
+          {/* Card do Histórico */}
           <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '20px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: `2px solid ${COLOR_PRIMARY}`, display: 'inline-block', paddingBottom: '2px' }}>
-              Historico da OS-({selectedOS.id}):
+              Histórico da OS ({selectedOS.id}):
             </h3>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', paddingLeft: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', paddingLeft: '4px' }}>
               {selectedOS.historico.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
                   {idx !== selectedOS.historico.length - 1 && (
-                    <div style={{ position: 'absolute', left: '5px', top: '16px', width: '2px', height: '28px', backgroundColor: '#CBD5E1' }} />
+                    <div style={{ position: 'absolute', left: '5px', top: '16px', width: '2px', height: '100%', backgroundColor: '#CBD5E1' }} />
                   )}
-                  <Circle size={12} fill={COLOR_PRIMARY} color={COLOR_PRIMARY} style={{ flexShrink: 0, marginRight: '16px', zIndex: 1 }} />
-                  <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', fontSize: '12px', color: '#333' }}>
-                    <span style={{ width: '140px', fontWeight: '500' }}>{item.data}</span>
-                    <span style={{ flex: 1, fontWeight: '600' }}>{item.evento}</span>
-                    <span style={{ color: '#666' }}>{item.responsavel}</span>
+                  <Circle size={12} fill={COLOR_PRIMARY} color={COLOR_PRIMARY} style={{ flexShrink: 0, marginRight: '12px', marginTop: '3px', zIndex: 1 }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontSize: '12px', color: '#333', gap: '2px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: '600' }}>{item.evento}</span>
+                      <span style={{ color: '#888', fontSize: '11px' }}>{item.data}</span>
+                    </div>
+                    <span style={{ color: '#666', fontSize: '11px' }}>{item.responsavel}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Card de Detalhes */}
           <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 16px 0' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: `2px solid ${COLOR_PRIMARY}`, display: 'inline-block', paddingBottom: '2px' }}>
               Detalhes da OS:
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: '#666' }}>Equipamento:</span>
-                <span style={{ fontWeight: '600' }}>{selectedOS.equipamento}</span>
+                <span style={{ fontWeight: '600', textAlign: 'right' }}>{selectedOS.equipamento}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#666' }}>Horimetro:</span>
-                <span style={{ fontWeight: '600' }}>{selectedOS.horimetro}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                <span style={{ color: '#666' }}>Horímetro:</span>
+                <span style={{ fontWeight: '600', textAlign: 'right' }}>{selectedOS.horimetro}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: '#666' }}>Local:</span>
-                <span style={{ fontWeight: '600' }}>{selectedOS.local}</span>
+                <span style={{ fontWeight: '600', textAlign: 'right' }}>{selectedOS.local}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: '#666' }}>Tipo de Serviço:</span>
-                <span style={{ fontWeight: '600' }}>{selectedOS.tipoServico}</span>
+                <span style={{ fontWeight: '600', textAlign: 'right' }}>{selectedOS.tipoServico}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#666', fontWeight: '700' }}>Prioridades:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#666', fontWeight: '700' }}>Prioridade:</span>
                 <span style={{ color: COLOR_ALTA, fontWeight: '700' }}>{selectedOS.prioridade}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: '6px' }}>
                 <span style={{ color: '#666' }}>Descrição:</span>
-                <span style={{ fontWeight: '500', textAlign: 'right', maxWidth: '180px' }}>{selectedOS.descricao}</span>
+                <span style={{ fontWeight: '500', textAlign: 'right', maxWidth: '200px' }}>{selectedOS.descricao}</span>
               </div>
             </div>
           </div>
