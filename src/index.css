@@ -30,3 +30,30 @@ h1, h2, h3, h4, h5, h6 {
 p {
   margin: 0;
 }
+
+/* Scrollbar Minimalista (Apenas a pílula de rolagem em cinza) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Trilho 100% invisível sem bordas */
+  border: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #94A3B8; /* Cinza sólido bem definido */
+  border-radius: 10px;
+  border: none; /* Garante que não haverá nenhuma borda em volta */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #64748B; /* Leve escurecida ao passar o mouse */
+}
+
+/* Suporte Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94A3B8 transparent;
+}

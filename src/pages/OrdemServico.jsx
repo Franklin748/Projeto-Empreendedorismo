@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import CriarOs from './CriarOs';
 import { 
   Filter, 
   Search, 
@@ -7,7 +8,6 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-// Cores do projeto
 const COLOR_PRIMARY = '#2381FD';
 const COLOR_BG_LIGHT = '#D8E0E5';
 const COLOR_TOTAL = '#95BDFB';
@@ -19,7 +19,7 @@ const COLOR_ALTA = '#FF4D4D';
 const PRIORITY_ORDER = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
 const STATUS_ORDER = { 'Em Execução': 3, 'Aberto': 2, 'Concluído': 1 };
 
-const MOCK_ORDERS = [
+const INITIAL_ORDERS = [
   {
     id: 'OS-0128',
     dataAbertura: '2024-05-24T08:30:00',
@@ -87,11 +87,13 @@ const DEFAULT_COLUMNS = [
 ];
 
 const OrdemServico = () => {
+  const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOS, setSelectedOS] = useState(MOCK_ORDERS[0]);
+  const [selectedOS, setSelectedOS] = useState(INITIAL_ORDERS[0]);
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -106,12 +108,12 @@ const OrdemServico = () => {
 
   const metrics = useMemo(() => {
     return {
-      total: MOCK_ORDERS.length,
-      aberto: MOCK_ORDERS.filter(o => o.status === 'Aberto').length,
-      execucao: MOCK_ORDERS.filter(o => o.status === 'Em Execução').length,
-      concluidas: MOCK_ORDERS.filter(o => o.status === 'Concluído').length,
+      total: orders.length,
+      aberto: orders.filter(o => o.status === 'Aberto').length,
+      execucao: orders.filter(o => o.status === 'Em Execução').length,
+      concluidas: orders.filter(o => o.status === 'Concluído').length,
     };
-  }, []);
+  }, [orders]);
 
   const columns = useMemo(() => {
     if (['data', 'status', 'prioridade', 'equipamento', 'solicitante', 'responsavel'].includes(sortField)) {
@@ -123,7 +125,7 @@ const OrdemServico = () => {
   }, [sortField]);
 
   const filteredAndSortedOrders = useMemo(() => {
-    let result = MOCK_ORDERS.filter((item) => {
+    let result = orders.filter((item) => {
       const term = searchTerm.toLowerCase();
       return (
         item.id.toLowerCase().includes(term) ||
@@ -168,7 +170,40 @@ const OrdemServico = () => {
       }
       return sortOrder === 'asc' ? a.id.localeCompare(b.id) : b.id.localeCompare(a.id);
     });
-  }, [searchTerm, sortField, sortOrder]);
+  }, [orders, searchTerm, sortField, sortOrder]);
+
+  const handleSaveOS = (newOsData) => {
+    const nextNumber = orders.length + 130;
+    const now = new Date();
+    
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    const newOS = {
+      id: `OS-0${nextNumber}`,
+      dataAbertura: now.toISOString(),
+      dataFormatada: formattedDate,
+      equipamento: newOsData.equipamento,
+      solicitante: newOsData.solicitante,
+      responsavel: newOsData.responsavel || 'Não atribuído',
+      status: 'Aberto',
+      prioridade: newOsData.prioridade || 'Média',
+      horimetro: newOsData.horimetro || 'N/A',
+      local: newOsData.local || 'N/A',
+      tipoServico: newOsData.tipoServico || 'Geral',
+      descricao: newOsData.descricao || 'Sem descrição',
+      historico: [
+        { data: formattedDate, evento: 'OS aberta', responsavel: newOsData.solicitante }
+      ]
+    };
+
+    setOrders(prev => [newOS, ...prev]);
+    setSelectedOS(newOS);
+  };
 
   const handleApplyFilter = (field) => {
     setSortField(field);
@@ -203,7 +238,7 @@ const OrdemServico = () => {
   };
 
   return (
-    <div style={{ flex: 1, backgroundColor: COLOR_BG_LIGHT, borderRadius: '24px', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', fontFamily: 'sans-serif', width: '100%' }}>
+    <div style={{ flex: 1, backgroundColor: COLOR_BG_LIGHT, borderRadius: '24px', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', fontFamily: 'sans-serif', width: '100%', maxHeight: '100vh' }}>
       
       {/* Cabeçalho */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
@@ -213,7 +248,7 @@ const OrdemServico = () => {
         </div>
         
         <button 
-          onClick={() => {}} 
+          onClick={() => setIsModalOpen(true)} 
           style={{ 
             backgroundColor: COLOR_PRIMARY, 
             color: '#FFF', 
@@ -233,16 +268,8 @@ const OrdemServico = () => {
         </button>
       </div>
 
-      {/* Métricas em Grade 2x2 */}
-      <div 
-        style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(2, 1fr)', 
-          gap: '12px', 
-          marginBottom: '24px' 
-        }}
-      >
-        {/* Total OS */}
+      {/* Métricas (Alinhadas horizontalmente em 4 colunas) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
         <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_TOTAL, flexShrink: 0 }} />
           <div>
@@ -252,7 +279,6 @@ const OrdemServico = () => {
           </div>
         </div>
 
-        {/* Aberto */}
         <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_ABERTO, flexShrink: 0 }} />
           <div>
@@ -262,7 +288,6 @@ const OrdemServico = () => {
           </div>
         </div>
 
-        {/* Em Execução */}
         <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_EXECUCAO, flexShrink: 0 }} />
           <div>
@@ -272,7 +297,6 @@ const OrdemServico = () => {
           </div>
         </div>
 
-        {/* Concluídas */}
         <div style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: COLOR_CONCLUIDO, flexShrink: 0 }} />
           <div>
@@ -289,7 +313,6 @@ const OrdemServico = () => {
           Ordem de Serviço
         </h2>
 
-        {/* Busca e Botão Filtrar */}
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
           <div style={{ flex: '1 1 240px', display: 'flex', alignItems: 'center', backgroundColor: '#EFEFEF', borderRadius: '8px', padding: '0 12px' }}>
             <Search size={16} color="#888" style={{ marginRight: '8px', flexShrink: 0 }} />
@@ -302,7 +325,6 @@ const OrdemServico = () => {
             />
           </div>
 
-          {/* Menu Dropdown de Filtros */}
           <div style={{ position: 'relative' }} ref={filterRef}>
             <button 
               onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -342,11 +364,11 @@ const OrdemServico = () => {
           </div>
         </div>
 
-        {/* Container para rolagem horizontal em telas pequenas */}
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        {/* Container rolável com altura máxima e cabeçalho fixo */}
+        <div style={{ overflowX: 'auto', maxHeight: '320px', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', minWidth: '650px' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#E2E8F0', color: '#333' }}>
+            <thead style={{ position: 'sticky', top: 0, backgroundColor: '#E2E8F0', zIndex: 1 }}>
+              <tr style={{ color: '#333' }}>
                 {columns.map((col, index) => (
                   <th 
                     key={col.key} 
@@ -404,7 +426,6 @@ const OrdemServico = () => {
       {selectedOS && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           
-          {/* Card do Histórico */}
           <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '20px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: `2px solid ${COLOR_PRIMARY}`, display: 'inline-block', paddingBottom: '2px' }}>
               Histórico da OS ({selectedOS.id}):
@@ -429,7 +450,6 @@ const OrdemServico = () => {
             </div>
           </div>
 
-          {/* Card de Detalhes */}
           <div style={{ backgroundColor: '#FFF', borderRadius: '16px', padding: '20px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 16px 0', borderBottom: `2px solid ${COLOR_PRIMARY}`, display: 'inline-block', paddingBottom: '2px' }}>
               Detalhes da OS:
@@ -454,7 +474,7 @@ const OrdemServico = () => {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: '#666', fontWeight: '700' }}>Prioridade:</span>
-                <span style={{ color: COLOR_ALTA, fontWeight: '700' }}>{selectedOS.prioridade}</span>
+                <span style={getBadgeStyle('prioridade', selectedOS.prioridade)}>{selectedOS.prioridade}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: '6px' }}>
                 <span style={{ color: '#666' }}>Descrição:</span>
@@ -464,6 +484,14 @@ const OrdemServico = () => {
           </div>
 
         </div>
+      )}
+
+      {/* Modal Criar OS */}
+      {isModalOpen && (
+        <CriarOs 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={handleSaveOS}
+        />
       )}
 
     </div>
